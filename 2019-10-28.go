@@ -28,14 +28,19 @@ import (
 	"strings"
 )
 
+type die struct {
+	faces string
+	which int
+}
+
 func main() {
 	values := []struct {
-		word string
-		dice []string
+		word  string
+		faces []string
 	}{
 		{
 			word: "hello",
-			dice: []string{
+			faces: []string{
 				"alcdef",
 				"abcdef",
 				"abchef",
@@ -45,7 +50,7 @@ func main() {
 		},
 		{
 			word: "hello",
-			dice: []string{
+			faces: []string{
 				"abcdef",
 				"abcdef",
 				"abcdef",
@@ -55,7 +60,7 @@ func main() {
 		},
 		{
 			word: "aaaa",
-			dice: []string{
+			faces: []string{
 				"aaaaaa",
 				"bbbbbb",
 				"abcdef",
@@ -65,69 +70,74 @@ func main() {
 	}
 
 	for _, value := range values {
-		fmt.Printf("word: %q\ndice: %+v\n", value.word, value.dice)
-		fmt.Println(pretty(attempt(value.word, value.dice)))
+		fmt.Printf("word: %q\ndice: %+v\n", value.word, value.faces)
+		fmt.Println(pretty(attempt(value.word, strings2dice(value.faces))))
+		fmt.Println()
 	}
 }
 
-func attempt(word string, dice []string) *[][]int {
+func attempt(word string, dice []die) *[][2]int {
 	if len(word) == 0 {
 		// special case: success
-		return &[][]int{}
+		return &[][2]int{}
 	}
 
 	r := []rune(word)[0]
-	for i, die := range dice {
-		where := strings.IndexRune(die, r)
+	for i, d := range dice {
+		where := strings.IndexRune(d.faces, r)
 		if where == -1 {
 			continue
 		}
 
-		remaining := remove(i, dice)
-		resp := attempt(word[1:], remaining)
-
+		resp := attempt(word[1:], remove(i, dice))
 		if resp == nil {
 			continue
 		}
 
-		me := [][]int{
-			[]int{i, where},
+		me := [][2]int{
+			[2]int{d.which, where},
 		}
-		res := *resp
 
-		me = append(me, res...)
-		return &me
+		all := append(me, *resp...)
+		return &all
 	}
 
 	return nil
 }
 
-func pretty(res *[][]int) string {
+func remove(i int, dice []die) []die {
+	// copy the input lest we corrupt it
+	res := make([]die, len(dice))
+	copy(res, dice)
+
+	res[i] = res[len(dice)-1]
+	return res[:len(dice)-1]
+}
+
+func pretty(res *[][2]int) string {
 	if res == nil {
 		return "Output: false"
 	}
 
-	answer := *res
-
 	var pretties []string
-	for _, die := range answer {
-		if len(die) != 2 {
-			panic("wtf")
-		}
-
-		pretties = append(pretties, fmt.Sprintf("dice[%v][%v] ", die[0], die[1]))
+	for _, die := range *res {
+		pretties = append(pretties, fmt.Sprintf("dice[%v][%v]", die[0], die[1]))
 	}
 
-	return fmt.Sprintf("Output: true\nWhy: %v", strings.Join(pretties, ", "))
+	return fmt.Sprintf("Output: true\nWhy? %v", strings.Join(pretties, " + "))
 }
 
-func remove(which int, dice []string) []string {
-	switch which {
-	case 0:
-		return dice[1:]
-	case len(dice) - 1:
-		return dice[:len(dice)-1]
+func strings2dice(faces []string) []die {
+	var dice []die
+
+	for i, s := range faces {
+		d := die{
+			which: i,
+			faces: s,
+		}
+
+		dice = append(dice, d)
 	}
 
-	return append(dice[:which], dice[which+1:]...)
+	return dice
 }
