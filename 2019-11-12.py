@@ -3,7 +3,7 @@
 from collections import defaultdict
 
 
-def solver(occur):
+def solve(occur):
     rc = 0
     done = False
 
@@ -21,19 +21,17 @@ def solver(occur):
     return rc
 
 
-def solve(s):
+def collate(s):
     d = defaultdict(int)
     for c in s:
         d[c] += 1
-    occur = sorted(d.values())
-
-    return solver(occur)
+    return sorted(d.values())
 
 
 def demo():
-    for i in ["eeeeffff", "aabbffddeaee", "llll", "", "aaabbbcccddddeeeee"]:
-        print("input: ", i)
-        print("output: ", solve(i))
+    for input in ["eeeeffff", "aabbffddeaee", "llll", "", "aaabbbcccddddeeeee"]:
+        print("input: ", input)
+        print("output: ", solve(collate(input)))
 
 
 if __name__ == "__main__":
