@@ -48,6 +48,9 @@ func main() {
 		},
 		zombieLand{},
 		zombieLand{
+			[]int{1},
+		},
+		zombieLand{
 			[]int{0, 0, 0, 0, 0, 1},
 		},
 		zombieLand{
@@ -64,6 +67,13 @@ func main() {
 			[]int{0, 0, 0, 0, 0, 0, 0, 0},
 			[]int{0, 0, 0, 0, 0, 0, 0, 0},
 			[]int{0, 0, 0, 0, 0, 0, 0, 1},
+		},
+		zombieLand{
+			[]int{0},
+			[]int{0, 0, 0},
+			[]int{0, 0, 0, 0, 0, 0, 0, 1},
+			[]int{0, 0, 0},
+			[]int{0},
 		},
 	}
 
@@ -141,18 +151,19 @@ func (z zombieLand) victim(row, col int) *coord {
 	if rows == 0 {
 		return nil
 	}
-	cols := len(z[0])
-	if cols == 0 {
+
+	if row < 0 || row >= rows {
 		return nil
 	}
 
-	// if we're out of bounds return nothing
-	if row < 0 || row >= rows || col < 0 || col >= cols {
+	r := z[row]
+	cols := len(r)
+	if col < 0 || col >= cols {
 		return nil
 	}
 
 	// if our victim isn't a human, return nothing
-	if z[row][col] != 0 {
+	if r[col] != 0 {
 		return nil
 	}
 
@@ -162,9 +173,7 @@ func (z zombieLand) victim(row, col int) *coord {
 }
 
 func (z zombieLand) String() string {
-	var (
-		rows []string
-	)
+	var rows []string
 
 	for _, row := range z {
 		rString := fmt.Sprintf("%v", row)
