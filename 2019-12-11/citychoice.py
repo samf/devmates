@@ -53,6 +53,7 @@ class Plan:
             self.total += city.pop(0)
             imbalance -= 2
 
+
 class Person:
     def __init__(self, city0, city1):
         self.city0 = city0
